@@ -1,5 +1,6 @@
 import com.github.polomarcus.utils.ClimateService
 import com.github.polomarcus.model.CO2Record
+import jdk.internal.vm.vector.VectorSupport.test
 import org.scalatest.funsuite.AnyFunSuite
 
 //@See https://www.scalatest.org/scaladoc/3.1.2/org/scalatest/funsuite/AnyFunSuite.html
@@ -10,6 +11,7 @@ class ClimateServiceTest extends AnyFunSuite {
 
   test("isClimateRelated - climate related words should return true") {
     assert(ClimateService.isClimateRelated("climate change") == true)
+    assert(ClimateService.isClimateRelated("IPCC"))
     assert(ClimateService.isClimateRelated("IPCC"))
   }
 
@@ -31,6 +33,85 @@ class ClimateServiceTest extends AnyFunSuite {
 
   //@TODO
   test("filterDecemberData") {
-    assert(true == false)
+    val list = List(
+      Some(CO2Record(1958, 3, 316.19)),
+      Some(CO2Record(1958, 4, 317.29)),
+      Some(CO2Record(1958, 5, 317.87)),
+      Some(CO2Record(1958, 6, -99.99)),
+      Some(CO2Record(1958, 7, 315.85)),
+      Some(CO2Record(1958, 8, 313.97)),
+      Some(CO2Record(1958, 9, 312.44)),
+      Some(CO2Record(1958, 10, -99.99)),
+      Some(CO2Record(1958, 11, 313.6)),
+      Some(CO2Record(1958, 12, 314.76))
+    )
+
+    val expectedResult = List(
+      CO2Record(1958, 3, 316.19),
+      CO2Record(1958, 4, 317.29),
+      CO2Record(1958, 5, 317.87),
+      CO2Record(1958, 6, -99.99),
+      CO2Record(1958, 7, 315.85),
+      CO2Record(1958, 8, 313.97),
+      CO2Record(1958, 9, 312.44),
+      CO2Record(1958, 10, -99.99),
+      CO2Record(1958, 11, 313.6)
+    )
+    assert(ClimateService.filterDecemberData(list) == expectedResult)
   }
+}
+
+  test("getMinMaxByYear") {
+    val list = List(
+    CO2Record(1958, 3, 316.19),
+    CO2Record(1958, 4, 317.29),
+    CO2Record(1959, 5, 317.87),
+    CO2Record(1959, 6, -99.99),
+    CO2Record(1960, 7, 315.85),
+    CO2Record(1960, 8, 313.97),
+    CO2Record(1960, 9, 312.44),
+    CO2Record(1961, 10, -99.99),
+    CO2Record(1961, 11, 313.6),
+    CO2Record(1961, 12, 314.76)
+  )
+
+  val expectedResult = (316.19, 317.29)
+  assert(ClimateService.getMinMaxByYear(1958) == expectedResult)
+}
+
+test("getMinMaxByYearDifferentYear") {
+  val list = List(
+    CO2Record(1958, 3, 316.19),
+    CO2Record(1958, 4, 317.29),
+    CO2Record(1959, 5, 317.87),
+    CO2Record(1959, 6, -99.99),
+    CO2Record(1960, 7, 315.85),
+    CO2Record(1960, 8, 313.97),
+    CO2Record(1960, 9, 312.44),
+    CO2Record(1961, 10, -99.99),
+    CO2Record(1961, 11, 313.6),
+    CO2Record(1961, 12, 314.76)
+  )
+
+  val expectedResult = (-99.99, 317.87)
+  assert(ClimateService.getMinMaxByYear(list, 1959) == expectedResult)
+}
+
+  test("differenceMinMaxByYear") {
+  val list = List(
+    CO2Record(1958, 3, 316.19),
+    CO2Record(1958, 4, 317.29),
+    CO2Record(1958, 5, 317.87),
+    CO2Record(1958, 6, -99.99),
+    CO2Record(1958, 7, 315.85),
+    CO2Record(1958, 8, 313.97),
+    CO2Record(1958, 9, 312.44),
+    CO2Record(1958, 10, -99.99),
+    CO2Record(1958, 11, 313.6),
+    CO2Record(1958, 12, 314.76)
+  )
+
+  val expectedResult = 5.03
+
+  assert(ClimateService.differenceMinMaxByYear(list, 1958) == expectedResult)
 }

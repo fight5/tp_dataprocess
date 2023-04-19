@@ -16,3 +16,9 @@ case class CO2Record (year: Int,
     ppm > 0
   }
 }
+
+object CO2Record{
+  def isValidPpmValue(ppm: Double): Boolean = {
+    ppm > 0
+  }
+}

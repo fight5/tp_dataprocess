@@ -16,7 +16,13 @@ object ClimateService {
    * @param description "my awesome sentence contains a key word like climate change"
    * @return Boolean True
    */
-  def isClimateRelated(description: String): Boolean = ???
+  def isClimateRelated(description: String): Boolean = {
+    val keywords = List("global warning", "IPCC", "climate change")
+    val lowerkeywords = keywords.map(_.toLowerCase)
+
+    lowerkeywords.exists(description.toLowerCase.contains)
+  }
+
 
   /**
    * parse a list of raw data and transport it with type into a list of CO2Record
@@ -26,8 +32,10 @@ object ClimateService {
    * you can access to Tuple with myTuple._1, myTuple._2, myTuple._3
    */
   def parseRawData(list: List[(Int, Int, Double)]) : List[Option[CO2Record]] = {
-    list.map { record => ??? }
-    ???
+    list.map { record =>
+      if (CO2Record.isValidPpmValue(record._3)) Some(CO2Record(record._1, record._2, record._3))
+      else None }
+
   }
 
   /**
@@ -36,15 +44,30 @@ object ClimateService {
    * @param list
    * @return a list
    */
-  def filterDecemberData(list: List[Option[CO2Record]]) : List[CO2Record] = ???
+  def filterDecemberData(list: List[Option[CO2Record]]) : List[CO2Record] = {
+    list.flatten.filter(record => record.month != 12)
+  }
 
 
   /**
    * **Tips**: look at the read me to find some tips for this function
    */
-  def getMinMax(list: List[CO2Record]) : (Double, Double) = ???
+  def getMinMax(list: List[CO2Record]) : (Double, Double) = {
+    list.map(_.ppm).foldLeft((Double.MaxValue, Double.MinValue)) { (acc, value) =>
+      (acc._1 min value, acc._2 max value)
+    }
+  }
 
-  def getMinMaxByYear(list: List[CO2Record], year: Int) : (Double, Double) = ???
+  def getMinMaxByYear(list: List[CO2Record], year: Int) : (Double, Double) = {
+    list.filter(record => record.year == year).map(_.ppm).foldLeft((Double.MaxValue, Double.MinValue)) { (acc, value) =>
+      (acc._1 min value, acc._2 max value)
+    }
+  }
+
+  def differenceMinMaxByYear(list: List[CO2Record], year: Int): Double = {
+    val (min, max) = getMinMaxByYear(list, year)
+    max - min
+  }
 
   /**
    * use this function side src/main/scala/com/polomarcus/main/Main (with sbt run)
